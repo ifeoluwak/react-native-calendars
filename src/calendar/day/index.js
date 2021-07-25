@@ -4,39 +4,28 @@ import XDate from 'xdate';
 import memoize from 'memoize-one';
 
 import React, {Component} from 'react';
-// @ts-expect-error
+
 import {shouldUpdate} from '../../component-updater';
-// @ts-expect-error
 import dateutils from '../../dateutils';
-// @ts-expect-error
 import {xdateToData} from '../../interface';
-// @ts-expect-error
 import {SELECT_DATE_SLOT} from '../../testIDs';
-import BasicDay, {BasicDayProps} from './basic';
+import BasicDay from './basic';
 import PeriodDay from './period';
-import {MarkingProps} from './marking';
 
-const basicDayPropsTypes = _.omit(BasicDay.propTypes, 'date');
+const basicDayProps = _.omit(BasicDay.propTypes, 'date');
 
-interface DayProps extends Omit<BasicDayProps, 'date'> {
-  /** The day to render */
-  day?: Date;
-  /** Provide custom day rendering component */
-  dayComponent?: any;
-}
-
-export default class Day extends Component<DayProps> {
+export default class Day extends Component {
   static displayName = 'IGNORE';
 
   static propTypes = {
-    ...basicDayPropsTypes,
+    ...basicDayProps,
     /** The day to render */
     day: PropTypes.object,
     /** Provide custom day rendering component */
     dayComponent: PropTypes.any
   };
 
-  shouldComponentUpdate(nextProps: DayProps) {
+  shouldComponentUpdate(nextProps) {
     return shouldUpdate(this.props, nextProps, [
       'day',
       'dayComponent',
@@ -48,7 +37,7 @@ export default class Day extends Component<DayProps> {
     ]);
   }
 
-  getMarkingLabel(marking: MarkingProps) {
+  getMarkingLabel(marking) {
     let label = '';
 
     if (marking) {
@@ -79,8 +68,8 @@ export default class Day extends Component<DayProps> {
   }
 
   getAccessibilityLabel = memoize((day, marking, isToday) => {
-    const today = _.get(XDate, 'locales[XDate.defaultLocale].today');
-    const formatAccessibilityLabel = _.get(XDate, 'locales[XDate.defaultLocale].formatAccessibilityLabel');
+    const today = XDate.locales[XDate.defaultLocale].today;
+    const formatAccessibilityLabel = XDate.locales[XDate.defaultLocale].formatAccessibilityLabel;
     const markingLabel = this.getMarkingLabel(marking);
 
     if (formatAccessibilityLabel) {
@@ -114,7 +103,7 @@ export default class Day extends Component<DayProps> {
         testID={`${SELECT_DATE_SLOT}-${date.dateString}`}
         accessibilityLabel={accessibilityLabel}
       >
-        {date ? day?.getDate() : day}
+        {date ? day.getDate() : day}
       </Component>
     );
   }

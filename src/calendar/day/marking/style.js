@@ -1,9 +1,9 @@
 import {StyleSheet} from 'react-native';
-// @ts-expect-error
 import * as defaultStyle from '../../style';
-import {Theme} from '../../../commons/types';
 
-export default function styleConstructor(theme: Theme = {}) {
+const STYLESHEET_ID = 'stylesheet.marking';
+
+export default function styleConstructor(theme = {}) {
   const appStyle = {...defaultStyle, ...theme};
   return StyleSheet.create({
     dots: {
@@ -27,6 +27,6 @@ export default function styleConstructor(theme: Theme = {}) {
       borderBottomRightRadius: 2,
       marginRight: 4
     },
-    ...(theme.stylesheet?.marking || {})
+    ...(theme[STYLESHEET_ID] || {})
   });
 }

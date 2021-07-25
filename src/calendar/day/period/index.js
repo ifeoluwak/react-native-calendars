@@ -2,27 +2,14 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 
 import React, {Component} from 'react';
-import {TouchableWithoutFeedback, Text, View, ViewStyle} from 'react-native';
-// @ts-expect-error
+import {TouchableWithoutFeedback, Text, View} from 'react-native';
+
 import {shouldUpdate} from '../../../component-updater';
-// @ts-expect-error
 import * as defaultStyle from '../../../style';
 import styleConstructor from './style';
 import Dot from '../dot';
-import {Theme} from '../../../commons/types';
 
-interface PeriodDayProps {
-  state?: 'selected' | 'disabled' | 'today' | '';
-  marking?: any;
-  theme?: Theme;
-  onPress?: (date?: Object) => void;
-  onLongPress?: (date?: Object) => void;
-  date?: Object;
-  accessibilityLabel?: string;
-  testID?: string;
-}
-
-export default class PeriodDay extends Component<PeriodDayProps> {
+export default class PeriodDay extends Component {
   static displayName = 'IGNORE';
 
   static propTypes = {
@@ -33,11 +20,8 @@ export default class PeriodDay extends Component<PeriodDayProps> {
     onLongPress: PropTypes.func,
     date: PropTypes.object
   };
-  theme: Theme;
-  style: any;
-  markingStyle: any;
 
-  constructor(props: PeriodDayProps) {
+  constructor(props) {
     super(props);
 
     this.theme = {...defaultStyle, ...(props.theme || {})};
@@ -47,14 +31,14 @@ export default class PeriodDay extends Component<PeriodDayProps> {
   }
 
   onPress = () => {
-    this.props.onPress?.(this.props.date);
+    this.props.onPress(this.props.date);
   };
 
   onLongPress = () => {
-    this.props.onLongPress?.(this.props.date);
+    this.props.onLongPress(this.props.date);
   };
 
-  shouldComponentUpdate(nextProps: PeriodDayProps) {
+  shouldComponentUpdate(nextProps) {
     const newMarkingStyle = this.getDrawingStyle(nextProps.marking);
     if (!_.isEqual(this.markingStyle, newMarkingStyle)) {
       this.markingStyle = newMarkingStyle;
@@ -64,8 +48,8 @@ export default class PeriodDay extends Component<PeriodDayProps> {
     return shouldUpdate(this.props, nextProps, ['children', 'state', 'marking', 'onPress', 'onLongPress', 'date']);
   }
 
-  getDrawingStyle(marking: any) {
-    const defaultStyle = {textStyle: {color: undefined}, containerStyle: {}};
+  getDrawingStyle(marking) {
+    const defaultStyle = {textStyle: {}, containerStyle: {}};
 
     if (!marking) {
       return defaultStyle;
@@ -131,8 +115,8 @@ export default class PeriodDay extends Component<PeriodDayProps> {
     const {state, marking} = this.props;
     const containerStyle = [this.style.base];
     const textStyle = [this.style.text];
-    let leftFillerStyle: ViewStyle = {backgroundColor: undefined};
-    let rightFillerStyle: ViewStyle = {backgroundColor: undefined};
+    let leftFillerStyle = {};
+    let rightFillerStyle = {};
     let fillerStyle = {};
     let fillers;
 

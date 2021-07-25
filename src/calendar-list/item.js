@@ -1,30 +1,14 @@
+import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
+
 import React, {Component} from 'react';
 import {Text, View} from 'react-native';
-import PropTypes from 'prop-types';
-import {Theme} from '../commons/types';
 
-// @ts-expect-error
 import {extractComponentProps} from '../component-updater';
-
-// @ts-expect-error
-import Calendar, {CalendarProps} from '../calendar';
+import Calendar from '../calendar';
 import styleConstructor from './style';
 
-export type CalendarListItemProps = CalendarProps & {
-  item: any;
-  calendarWidth?: number;
-  calendarHeight?: number;
-  horizontal?: boolean;
-  theme?: Theme;
-}
-
-type CalendarListItemState = {
-  hideArrows: boolean;
-  hideExtraDays: boolean;
-}
-
-class CalendarListItem extends Component<CalendarListItemProps, CalendarListItemState> {
+class CalendarListItem extends Component {
   static displayName = 'IGNORE';
 
   static propTypes = {
@@ -40,22 +24,20 @@ class CalendarListItem extends Component<CalendarListItemProps, CalendarListItem
     hideExtraDays: true
   };
 
-  style: any;
-
-  constructor(props: CalendarListItemProps) {
+  constructor(props) {
     super(props);
 
     this.style = styleConstructor(props.theme);
   }
 
-  shouldComponentUpdate(nextProps: CalendarListItemProps) {
+  shouldComponentUpdate(nextProps) {
     const r1 = this.props.item;
     const r2 = nextProps.item;
 
-    return r1.toString('yyyy MM') !== r2.toString('yyyy MM') || !!(r2.propBump && r2.propBump !== r1.propBump);
+    return r1.toString('yyyy MM') !== r2.toString('yyyy MM') || !!(r2.propbump && r2.propbump !== r1.propbump);
   }
 
-  onPressArrowLeft = (_: any, month: any) => {
+  onPressArrowLeft = (_, month) => {
     const {onPressArrowLeft, scrollToMonth} = this.props;
     const monthClone = month.clone();
 
@@ -74,7 +56,7 @@ class CalendarListItem extends Component<CalendarListItemProps, CalendarListItem
     }
   };
 
-  onPressArrowRight = (_: any, month: any) => {
+  onPressArrowRight = (_, month) => {
     const {onPressArrowRight, scrollToMonth} = this.props;
     const monthClone = month.clone();
 

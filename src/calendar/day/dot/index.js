@@ -2,18 +2,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import {View} from 'react-native';
 import styleConstructor from './style';
-import {Theme} from '../../../commons/types';
 
-export interface DotProps {
-  theme?: Theme;
-  color?: String;
-  marked?: Boolean;
-  selected?: Boolean;
-  disabled?: Boolean;
-  today?: Boolean;
-}
-
-const Dot = ({theme, marked, disabled, color, today, selected}: DotProps) => {
+const Dot = ({theme, marked, disabled, color, today, selected}) => {
   const style = styleConstructor(theme);
   const dotStyle = [style.dot];
 
@@ -36,8 +26,8 @@ const Dot = ({theme, marked, disabled, color, today, selected}: DotProps) => {
       dotStyle.push({backgroundColor: color});
     }
   }
-
-  return <View style={dotStyle} />;
+  
+  return <View style={dotStyle}/>;
 };
 
 export default Dot;

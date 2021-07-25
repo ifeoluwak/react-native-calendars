@@ -1,9 +1,9 @@
 import {StyleSheet} from 'react-native';
-// @ts-expect-error
 import * as defaultStyle from '../../../style';
-import {Theme} from '../../../commons/types';
 
-export default function styleConstructor(theme: Theme = {}) {
+const STYLESHEET_ID = 'stylesheet.dot';
+
+export default function styleConstructor(theme = {}) {
   const appStyle = {...defaultStyle, ...theme};
   return StyleSheet.create({
     dot: {
@@ -28,6 +28,6 @@ export default function styleConstructor(theme: Theme = {}) {
     todayDot: {
       backgroundColor: appStyle.todayDotColor || appStyle.dotColor
     },
-    ...(theme.stylesheet?.dot || {})
+    ...(theme[STYLESHEET_ID] || {})
   });
 }

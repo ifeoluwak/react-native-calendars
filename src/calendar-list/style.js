@@ -1,9 +1,9 @@
 import {Platform, StyleSheet} from 'react-native';
-// @ts-expect-error
 import * as defaultStyle from '../style';
-import {Theme} from '../commons/types';
 
-export default function getStyle(theme: Theme = {}) {
+const STYLESHEET_ID = 'stylesheet.calendar-list.main';
+
+export default function getStyle(theme = {}) {
   const appStyle = {...defaultStyle, ...theme};
   return StyleSheet.create({
     flatListContainer: {
@@ -35,6 +35,6 @@ export default function getStyle(theme: Theme = {}) {
       paddingLeft: 15,
       paddingRight: 15
     },
-    ...(theme.stylesheet?.['calendar-list']?.main || {})
+    ...(theme[STYLESHEET_ID] || {})
   });
 }
