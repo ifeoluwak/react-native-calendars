@@ -1,11 +1,15 @@
 import {StyleSheet, Platform} from 'react-native';
+// @ts-expect-error
 import * as defaultStyle from '../../../style';
+import {Theme} from '../../../commons/types';
 
-const STYLESHEET_ID = 'stylesheet.day.basic';
-
-export default function styleConstructor(theme={}) {
+export default function styleConstructor(theme: Theme = {}) {
   const appStyle = {...defaultStyle, ...theme};
   return StyleSheet.create({
+    container: {
+      alignSelf: 'stretch',
+      alignItems: 'center'
+    },
     base: {
       width: 32,
       height: 32,
@@ -61,6 +65,6 @@ export default function styleConstructor(theme={}) {
     todayDot: {
       backgroundColor: appStyle.todayDotColor || appStyle.dotColor
     },
-    ...(theme[STYLESHEET_ID] || {})
+    ...(theme.stylesheet?.day?.basic || {})
   });
 }

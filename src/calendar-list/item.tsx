@@ -1,11 +1,30 @@
-import PropTypes from 'prop-types';
+import memoize from 'memoize-one';
 import React, {Component} from 'react';
 import {Text, View} from 'react-native';
+import PropTypes from 'prop-types';
+import {Theme} from '../commons/types';
+
+// @ts-expect-error
 import {extractComponentProps} from '../component-updater';
-import Calendar from '../calendar';
+
+// @ts-expect-error
+import Calendar, {CalendarProps} from '../calendar';
 import styleConstructor from './style';
 
-class CalendarListItem extends Component {
+export type CalendarListItemProps = CalendarProps & {
+  item: any;
+  calendarWidth?: number;
+  calendarHeight?: number;
+  horizontal?: boolean;
+  theme?: Theme;
+}
+
+type CalendarListItemState = {
+  hideArrows: boolean;
+  hideExtraDays: boolean;
+}
+
+class CalendarListItem extends Component<CalendarListItemProps, CalendarListItemState> {
   static displayName = 'IGNORE';
 
   static propTypes = {
@@ -21,20 +40,22 @@ class CalendarListItem extends Component {
     hideExtraDays: true
   };
 
-  constructor(props) {
+  style: any;
+
+  constructor(props: CalendarListItemProps) {
     super(props);
 
     this.style = styleConstructor(props.theme);
   }
 
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate(nextProps: CalendarListItemProps) {
     const r1 = this.props.item;
     const r2 = nextProps.item;
 
-    return r1.toString('yyyy MM') !== r2.toString('yyyy MM') || !!(r2.propbump && r2.propbump !== r1.propbump);
+    return r1.toString('yyyy MM') !== r2.toString('yyyy MM') || !!(r2.propBump && r2.propBump !== r1.propBump);
   }
 
-  onPressArrowLeft = (_, month) => {
+  onPressArrowLeft = (_: any, month: any) => {
     const {onPressArrowLeft, scrollToMonth} = this.props;
     const monthClone = month.clone();
 
@@ -53,7 +74,7 @@ class CalendarListItem extends Component {
     }
   };
 
-  onPressArrowRight = (_, month) => {
+  onPressArrowRight = (_: any, month: any) => {
     const {onPressArrowRight, scrollToMonth} = this.props;
     const monthClone = month.clone();
 
@@ -65,6 +86,10 @@ class CalendarListItem extends Component {
     }
   };
 
+  getCalendarStyle = memoize((width, height, style) => {
+    return [{width, height}, this.style.calendar, style];
+  });
+
   render() {
     const {
       item,
@@ -75,21 +100,24 @@ class CalendarListItem extends Component {
       style,
       headerStyle,
       onPressArrowLeft,
-      onPressArrowRight
+      onPressArrowRight,
+      context
     } = this.props;
-    const calendarUserProps = extractComponentProps(Calendar, this.props);
+    const calendarProps = extractComponentProps(Calendar, this.props);
+    const calStyle = this.getCalendarStyle(calendarWidth, calendarHeight, style);
 
     if (item.getTime) {
       return (
         <Calendar
-          {...calendarUserProps}
+          {...calendarProps}
           testID={testID}
           current={item}
-          style={[{height: calendarHeight, width: calendarWidth}, this.style.calendar, style]}
+          style={calStyle}
           headerStyle={horizontal ? headerStyle : undefined}
           disableMonthChange
           onPressArrowLeft={horizontal ? this.onPressArrowLeft : onPressArrowLeft}
           onPressArrowRight={horizontal ? this.onPressArrowRight : onPressArrowRight}
+          context={context}
         />
       );
     } else {

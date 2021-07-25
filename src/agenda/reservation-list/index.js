@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
+
 import React, {Component} from 'react';
 import {FlatList, ActivityIndicator, View} from 'react-native';
+
 import {extractComponentProps} from '../../component-updater';
 import dateutils from '../../dateutils';
-import {parseDate} from '../../interface';
+import {toMarkingFormat, parseDate} from '../../interface';
 import styleConstructor from './style';
 import Reservation from './reservation';
 
@@ -14,34 +16,34 @@ class ReservationList extends Component {
 
   static propTypes = {
     ...Reservation.propTypes,
-    // the list of items that have to be displayed in agenda. If you want to render item as empty date
-    // the value of date key kas to be an empty array []. If there exists no value for date key it is
-    // considered that the date in question is not yet loaded
+    /** the list of items that have to be displayed in agenda. If you want to render item as empty date
+    the value of date key kas to be an empty array []. If there exists no value for date key it is
+    considered that the date in question is not yet loaded */
     reservations: PropTypes.object,
     selectedDay: PropTypes.instanceOf(XDate),
     topDay: PropTypes.instanceOf(XDate),
     /** Show items only for the selected day. Default = false */
     showOnlySelectedDayItems: PropTypes.bool,
-    // callback that gets called when day changes while scrolling agenda list
+    /** callback that gets called when day changes while scrolling agenda list */
     onDayChange: PropTypes.func,
     /** specify what should be rendered instead of ActivityIndicator */
     renderEmptyData: PropTypes.func,
 
     /** onScroll ListView event */
     onScroll: PropTypes.func,
-    /** Called when the user begins dragging the agenda list. **/
+    /** Called when the user begins dragging the agenda list **/
     onScrollBeginDrag: PropTypes.func,
-    /** Called when the user stops dragging the agenda list. **/
+    /** Called when the user stops dragging the agenda list **/
     onScrollEndDrag: PropTypes.func,
-    /** Called when the momentum scroll starts for the agenda list. **/
+    /** Called when the momentum scroll starts for the agenda list **/
     onMomentumScrollBegin: PropTypes.func,
-    /** Called when the momentum scroll stops for the agenda list. **/
+    /** Called when the momentum scroll stops for the agenda list **/
     onMomentumScrollEnd: PropTypes.func,
-    /** A RefreshControl component, used to provide pull-to-refresh functionality for the ScrollView. */
+    /** A RefreshControl component, used to provide pull-to-refresh functionality for the ScrollView */
     refreshControl: PropTypes.element,
-    /** Set this true while waiting for new data from a refresh. */
+    /** Set this true while waiting for new data from a refresh */
     refreshing: PropTypes.bool,
-    /** If provided, a standard RefreshControl will be added for "Pull to Refresh" functionality. Make sure to also set the refreshing prop correctly. */
+    /** If provided, a standard RefreshControl will be added for "Pull to Refresh" functionality. Make sure to also set the refreshing prop correctly */
     onRefresh: PropTypes.func
   };
 
@@ -106,7 +108,7 @@ class ReservationList extends Component {
 
   getReservationsForDay(iterator, props) {
     const day = iterator.clone();
-    const res = props.reservations[day.toString('yyyy-MM-dd')];
+    const res = props.reservations[toMarkingFormat(day)];
     if (res && res.length) {
       return res.map((reservation, i) => {
         return {
@@ -210,54 +212,58 @@ class ReservationList extends Component {
   };
 
   renderRow = ({item, index}) => {
-    const reservationUserProps = extractComponentProps(Reservation, this.props);
+    const reservationProps = extractComponentProps(Reservation, this.props);
 
     return (
       <View onLayout={this.onRowLayoutChange.bind(this, index)}>
-        <Reservation {...reservationUserProps} item={item} />
+        <Reservation {...reservationProps} item={item} />
       </View>
     );
   };
 
-_onRefresh = () => {
-  let h = 0;
-  let scrollPosition = 0;
-  const selectedDay = this.props.selectedDay.clone();
-  const iterator = parseDate(this.props.selectedDay.clone().getTime()-3600*24*10*1000);
-  let reservations = [];
-  for (let i = 0; i < 10; i++) {
-    const res = this.getReservationsForDay(iterator, this.props);
-    if (res) {
-      reservations = reservations.concat(res);
-    }
-    iterator.addDays(1);
-  }
-  scrollPosition = reservations.length;
-  for (let i = 10; i < 30; i++) {
-    const res = this.getReservationsForDay(iterator, this.props);
-    if (res) {
-      reservations = reservations.concat(res);
-    }
-    iterator.addDays(1);
-  }
-  this.setState({
-    reservations
-  }, () => {
-    setTimeout(() => {
-      let h = 0;
-      for (let i = 0; i < scrollPosition; i++) {
-        h += this.heights[i] || 0;
+  _onRefresh = () => {
+    let h = 0;
+    let scrollPosition = 0;
+    const selectedDay = this.props.selectedDay.clone();
+    const iterator = parseDate(this.props.selectedDay.clone().getTime()-3600*24*10*1000);
+    let reservations = [];
+    for (let i = 0; i < 10; i++) {
+      const res = this.getReservationsForDay(iterator, this.props);
+      if (res) {
+        reservations = reservations.concat(res);
       }
-      this.list.scrollToOffset({offset: h, animated: false});
-      this.props.onDayChange(selectedDay, false);
-    }, 100);
-  });
-}
+      iterator.addDays(1);
+    }
+    scrollPosition = reservations.length;
+    for (let i = 10; i < 30; i++) {
+      const res = this.getReservationsForDay(iterator, this.props);
+      if (res) {
+        reservations = reservations.concat(res);
+      }
+      iterator.addDays(1);
+    }
+    this.setState({
+      reservations
+    }, () => {
+      setTimeout(() => {
+        let h = 0;
+        for (let i = 0; i < scrollPosition; i++) {
+          h += this.heights[i] || 0;
+        }
+        this.list.scrollToOffset({offset: h, animated: false});
+        this.props.onDayChange(selectedDay, false);
+      }, 100);
+    });
+  }
+
+  keyExtractor = (item, index) => String(index);
 
   render() {
     const {reservations, selectedDay, theme, style} = this.props;
-    if (!reservations || !reservations[selectedDay.toString('yyyy-MM-dd')]) {
-      _.invoke(this.props, 'renderEmptyData');
+    if (!reservations || !reservations[toMarkingFormat(selectedDay)]) {
+      if (_.isFunction(this.props.renderEmptyData)) {
+        return _.invoke(this.props, 'renderEmptyData');
+      }
 
       return <ActivityIndicator style={this.style.indicator} color={theme && theme.indicatorColor} />;
     }
@@ -269,7 +275,7 @@ _onRefresh = () => {
         contentContainerStyle={this.style.content}
         data={this.state.reservations}
         renderItem={this.renderRow}
-        keyExtractor={(item, index) => String(index)}
+        keyExtractor={this.keyExtractor}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={200}
         onMoveShouldSetResponderCapture={this.onMoveShouldSetResponderCapture}
