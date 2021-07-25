@@ -1,15 +1,16 @@
 import {StyleSheet} from 'react-native';
-import * as defaultStyle from '../../style';
+// @ts-expect-error
+import * as defaultStyle from '../../../style';
+import {Theme} from '../../../commons/types';
 
-const STYLESHEET_ID = 'stylesheet.dot';
-
-export default function styleConstructor(theme={}) {
+export default function styleConstructor(theme: Theme = {}) {
   const appStyle = {...defaultStyle, ...theme};
   return StyleSheet.create({
     dot: {
       width: 4,
       height: 4,
       marginTop: 1,
+      marginHorizontal: 1,
       borderRadius: 2,
       opacity: 0,
       ...appStyle.dotStyle
@@ -27,6 +28,6 @@ export default function styleConstructor(theme={}) {
     todayDot: {
       backgroundColor: appStyle.todayDotColor || appStyle.dotColor
     },
-    ...(theme[STYLESHEET_ID] || {})
+    ...(theme.stylesheet?.dot || {})
   });
 }
